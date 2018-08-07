@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.aiiage.keyboard.view.ClickableEditText;
 import com.example.aiiage.keyboard.view.KeyboardView;
@@ -41,102 +42,15 @@ public class SecondNumberActivity extends Activity implements View.OnClickListen
      */
     GestureDetector mDetector;
     float startPointEvent, stopPointEvent;
+    int curatorIndex;
+    Drawable mDrawable;
     /**
      * Update start position
      */
     private boolean refreshStartPoint = true;
     private int mScreenWidth = 0;
     private List<String> keyboardNumbers;
-    int curatorIndex;
-    Drawable mDrawable;
     private boolean isTextChanging = false;
-
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // Require window feature
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_second_number);
-
-        initViews();
-    }
-
-    private void initViews() {
-        // int views
-        videoIdEt = (ClickableEditText) findViewById(R.id.ai_long_et_video_code);
-        keyboardView = (KeyboardView) findViewById(R.id.tv_key);
-        mDrawable = getResources().getDrawable(R.drawable.ic_search);
-        // set view properties
-        videoIdEt.setCompoundDrawablesWithIntrinsicBounds(mDrawable, null, null,null);
-        // set listeners
-        videoIdEt.setDrawableRightListener(this);
-        videoIdEt.addTextChangedListener(watcher);
-        findViewById(R.id.ai_long_tv_confirm).setOnClickListener(this);
-        videoIdEt.setOnClickListener(this);
-        keyboardView.setOnKeyBoardClickListener(this);
-        keyboardView.recyclerView.setOnTouchListener(onTouchListener);
-        // keyboard setting
-        initGestureDetector();
-        keyboardNumbers = keyboardView.getKeyboardWords();
-        enableSystemKeyboard();
-    }
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.ai_long_tv_confirm:
-            /*    String videoId = videoIdEt.getText().toString().replace(" ", "");
-                Utils.startAiLongVideoActivity(videoId);*/
-                break;
-            case R.id.ai_long_et_video_code:
-                if (!keyboardView.isVisible()) {
-                    keyboardView.show();
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * Keyboard number key onclick listener
-     *
-     * @param view     The number key
-     * @param holder   The number adapter holder
-     * @param position The number key position
-     */
-    @SuppressLint("SetTextI18n")
-    @Override
-    public void onKeyClick(View view, RecyclerView.ViewHolder holder, int position) {
-        String editText = videoIdEt.getText().toString();
-        switch (position) {
-            case 9:
-                break;
-            default:
-                int index = videoIdEt.getSelectionStart();
-                if (index != videoIdEt.getText().length()) {
-                    // mEditText_InputNumber.getText().clear();
-                    String inputEditText = keyboardNumbers.get(position);
-                    Log.d(TAG, "inputEditText:" + inputEditText);
-                    videoIdEt.getText().insert(index, inputEditText);
-                } else {
-                    videoIdEt.setText(videoIdEt.getText().toString().trim() + keyboardNumbers.get(position));
-                    videoIdEt.setSelection(videoIdEt.getText().length());
-                }
-                if (videoIdEt.getText().length() > 0) {
-                    findViewById(R.id.ai_long_tv_confirm).setBackgroundResource(R.drawable.bg_determine_text);
-                    Drawable drawable = getResources().getDrawable(R.drawable.ic_delete1);
-                    videoIdEt.setCompoundDrawablesWithIntrinsicBounds(mDrawable, null, drawable,null);
-                }
-                break;
-        }
-    }
-
-    // ------------------------ Handle keyboard touch event start ------------------------
-
     /**
      * Get the start and stop position:
      * 1. Start position: the first event of 'ACTION_MOVE', because of 'ACTION_DOWN' event is gone
@@ -166,6 +80,145 @@ public class SecondNumberActivity extends Activity implements View.OnClickListen
             return mDetector.onTouchEvent(motionEvent);
         }
     };
+    /**
+     * Insert whitespace at every three number
+     */
+    private TextWatcher watcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int start, int before, int i2) {
+            if (isTextChanging) {
+                isTextChanging = false;
+                return;
+            }
+            isTextChanging = true;
+            String result = "";
+            String newStr = charSequence.toString();
+            newStr = newStr.replace(" ", "");
+            int index = 0;
+            while ((index + 3) < newStr.length()) {
+                result += (newStr.substring(index, index + 3) + " ");
+                index += 3;
+            }
+            result += (newStr.substring(index, newStr.length()));
+            int i = videoIdEt.getSelectionStart();
+            videoIdEt.setText(result);
+            try {
+                if (i % 4 == 0 && before == 0) {
+                    if (i + 1 <= result.length()) {
+                        videoIdEt.setSelection(i + 1);
+                    } else {
+                        videoIdEt.setSelection(result.length());
+                    }
+                } else if (before == 1 && i < result.length()) {
+                    videoIdEt.setSelection(i);
+                } else if (before == 0 && i < result.length()) {
+                    videoIdEt.setSelection(i);
+                } else {
+                    videoIdEt.setSelection(result.length());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    };
+
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Require window feature
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.activity_second_number);
+        initViews();
+    }
+
+    private void initViews() {
+        // int views
+        videoIdEt = (ClickableEditText) findViewById(R.id.ai_long_et_video_code);
+        keyboardView = (KeyboardView) findViewById(R.id.tv_key);
+        mDrawable = getResources().getDrawable(R.drawable.ic_search);
+        // set view properties
+        videoIdEt.setCompoundDrawablesWithIntrinsicBounds(mDrawable, null, null, null);
+        // set listeners
+        videoIdEt.setDrawableRightListener(this);
+        videoIdEt.addTextChangedListener(watcher);
+        findViewById(R.id.ai_long_tv_confirm).setOnClickListener(this);
+        videoIdEt.setOnClickListener(this);
+        keyboardView.setOnKeyBoardClickListener(this);
+        keyboardView.recyclerView.setOnTouchListener(onTouchListener);
+        // keyboard setting
+        initGestureDetector();
+        keyboardNumbers = keyboardView.getKeyboardWords();
+        enableSystemKeyboard();
+    }
+
+    // ------------------------ Handle keyboard touch event start ------------------------
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.ai_long_tv_confirm:
+                Toast.makeText(this, "确定，点击成功", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.ai_long_et_video_code:
+                if (!keyboardView.isVisible()) {
+                    keyboardView.show();
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Keyboard number key onclick listener
+     *
+     * @param view     The number key
+     * @param holder   The number adapter holder
+     * @param position The number key position
+     */
+    @SuppressLint("SetTextI18n")
+    @Override
+    public void onKeyClick(View view, RecyclerView.ViewHolder holder, int position) {
+        String editText = videoIdEt.getText().toString();
+        switch (position) {
+            case 9:
+                break;
+            default:
+                //获取当前光标位置
+                int index = videoIdEt.getSelectionStart();
+                if (index != videoIdEt.getText().length()) {
+                    //在光标处插入数字
+                    String inputEditText = keyboardNumbers.get(position);
+                    Log.d(TAG, "inputEditText:" + inputEditText);
+                    videoIdEt.getText().insert(index, inputEditText);
+                } else {
+                    videoIdEt.setText(videoIdEt.getText().toString().trim() + keyboardNumbers.get(position));
+                    videoIdEt.setSelection(videoIdEt.getText().length());
+                }
+                if (videoIdEt.getText().length() > 0) {
+                    //设置按钮颜色以及右删除图标为可见
+                    findViewById(R.id.ai_long_tv_confirm).setBackgroundResource(R.drawable.bg_determine_text);
+                    Drawable drawable = getResources().getDrawable(R.drawable.ic_delete1);
+                    videoIdEt.setCompoundDrawablesWithIntrinsicBounds(mDrawable, null, drawable, null);
+                }
+                break;
+        }
+    }
+
+    // ------------------------ Handle keyboard touch event start ------------------------
 
     /**
      * 1. Calculate the distance between start position and stop position
@@ -238,60 +291,6 @@ public class SecondNumberActivity extends Activity implements View.OnClickListen
         });
     }
 
-    // ------------------------ Handle keyboard touch event start ------------------------
-
-    /**
-     * Insert whitespace at every three number
-     */
-    private TextWatcher watcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int start, int before, int i2) {
-            if (isTextChanging) {
-                isTextChanging = false;
-                return;
-            }
-            isTextChanging = true;
-            String result = "";
-            String newStr = charSequence.toString();
-            newStr = newStr.replace(" ", "");
-            int index = 0;
-            while ((index + 3) < newStr.length()) {
-                result += (newStr.substring(index, index + 3) + " ");
-                index += 3;
-            }
-            result += (newStr.substring(index, newStr.length()));
-            int i = videoIdEt.getSelectionStart();
-            videoIdEt.setText(result);
-            try {
-                if (i % 4 == 0 && before == 0) {
-                    if (i + 1 <= result.length()) {
-                        videoIdEt.setSelection(i + 1);
-                    } else {
-                        videoIdEt.setSelection(result.length());
-                    }
-                } else if (before == 1 && i < result.length()) {
-                    videoIdEt.setSelection(i);
-                } else if (before == 0 && i < result.length()) {
-                    videoIdEt.setSelection(i);
-                } else {
-                    videoIdEt.setSelection(result.length());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-
-        }
-    };
-
     /**
      * Click on delete key of keyboard
      *
@@ -305,7 +304,7 @@ public class SecondNumberActivity extends Activity implements View.OnClickListen
         if (currentIndex > 0) {
             videoIdEt.getText().delete(currentIndex - 1, currentIndex);
             if (videoIdEt.getText().length() == 0) {
-                videoIdEt.setCompoundDrawablesWithIntrinsicBounds(mDrawable, null, null,null);
+                videoIdEt.setCompoundDrawablesWithIntrinsicBounds(mDrawable, null, null, null);
                 findViewById(R.id.ai_long_tv_confirm).setBackgroundResource(R.drawable.bg_determine_disable);
             }
         }
@@ -335,13 +334,14 @@ public class SecondNumberActivity extends Activity implements View.OnClickListen
         switch (view.getId()) {
             case R.id.ai_long_et_video_code:
                 videoIdEt.getText().clear();
-                videoIdEt.setCompoundDrawablesWithIntrinsicBounds(mDrawable, null, null,null);
+                videoIdEt.setCompoundDrawablesWithIntrinsicBounds(mDrawable, null, null, null);
                 findViewById(R.id.ai_long_tv_confirm).setBackgroundResource(R.drawable.bg_determine_disable);
                 break;
             default:
                 break;
         }
     }
+
     @Override
     public void onBackPressed() {
         if (keyboardView.isVisible()) {

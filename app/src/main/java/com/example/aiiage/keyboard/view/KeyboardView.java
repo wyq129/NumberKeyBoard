@@ -11,7 +11,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.RelativeLayout;
 
-
 import com.example.aiiage.keyboard.KeyboardAdapter;
 import com.example.aiiage.keyboard.R;
 
@@ -28,6 +27,7 @@ public class KeyboardView extends RelativeLayout {
     private Animation animationIn;
     private Animation animationOut;
     private RelativeLayout rl_back;
+
     public KeyboardView(Context context) {
         this(context, null);
     }
@@ -44,7 +44,7 @@ public class KeyboardView extends RelativeLayout {
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         LayoutInflater.from(context).inflate(R.layout.layout_key_board, this);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        rl_back=findViewById(R.id.rl_back);
+        rl_back = findViewById(R.id.rl_back);
         rl_back.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) { // 点击关闭键盘
@@ -79,31 +79,11 @@ public class KeyboardView extends RelativeLayout {
      */
     private void initView() {
         int spanCount = 12;
-
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
         recyclerView.setNestedScrollingEnabled(false);
         recyclerView.addItemDecoration(new SpaceItemDecoration(spanCount));
         adapter = new KeyboardAdapter(getContext(), keyboardWords);
         recyclerView.setAdapter(adapter);
-    }
-
-    /**
-     * item分割线
-     */
-    public class SpaceItemDecoration extends RecyclerView.ItemDecoration {
-        private int space;
-
-        public SpaceItemDecoration(int space) {
-            this.space = space;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            outRect.left = space;
-            outRect.bottom = space;
-            outRect.top = space;
-            outRect.right = space;
-        }
     }
 
     /**
@@ -152,6 +132,25 @@ public class KeyboardView extends RelativeLayout {
 
     public RelativeLayout getRlBack() {
         return rl_back;
+    }
+
+    /**
+     * item分割线
+     */
+    public class SpaceItemDecoration extends RecyclerView.ItemDecoration {
+        private int space;
+
+        public SpaceItemDecoration(int space) {
+            this.space = space;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            outRect.left = space;
+            outRect.bottom = space;
+            outRect.top = space;
+            outRect.right = space;
+        }
     }
 
 }

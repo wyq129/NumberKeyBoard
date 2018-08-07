@@ -14,13 +14,12 @@ import android.widget.EditText;
  */
 @SuppressLint("AppCompatCustomView")
 public class ClickableEditText extends EditText {
-    private DrawableLeftListener mLeftListener;
-    private DrawableRightListener mRightListener;
-
     final int DRAWABLE_LEFT = 0;
     final int DRAWABLE_TOP = 1;
     final int DRAWABLE_RIGHT = 2;
     final int DRAWABLE_BOTTOM = 3;
+    private DrawableLeftListener mLeftListener;
+    private DrawableRightListener mRightListener;
 
     public ClickableEditText(Context context) {
         super(context);
@@ -40,14 +39,6 @@ public class ClickableEditText extends EditText {
 
     public void setDrawableRightListener(DrawableRightListener listener) {
         this.mRightListener = listener;
-    }
-
-    public interface DrawableLeftListener {
-        public void onDrawableLeftClick(View view);
-    }
-
-    public interface DrawableRightListener {
-        public void onDrawableRightClick(View view);
     }
 
     @Override
@@ -70,5 +61,13 @@ public class ClickableEditText extends EditText {
                 break;
         }
         return super.onTouchEvent(event);
+    }
+
+    public interface DrawableLeftListener {
+        public void onDrawableLeftClick(View view);
+    }
+
+    public interface DrawableRightListener {
+        public void onDrawableRightClick(View view);
     }
 }

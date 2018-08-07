@@ -12,12 +12,10 @@ import android.widget.TextView;
 import java.util.List;
 
 /**
- *
  * @author wangyanqin
  */
 
 public class KeyboardAdapter extends RecyclerView.Adapter<KeyboardAdapter.KeyboardHolder> {
-
     private Context context;
     private List<String> datas;
     private OnKeyboardClickListener listener;
@@ -34,12 +32,13 @@ public class KeyboardAdapter extends RecyclerView.Adapter<KeyboardAdapter.Keyboa
         setListener(holder);
         return holder;
     }
+
     private void setListener(final KeyboardHolder holder) {
         holder.tvKey.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (listener != null) {
-                    if (holder.getAdapterPosition()!=9) {
+                    if (holder.getAdapterPosition() != 9) {
                         listener.onKeyClick(view, holder, holder.getAdapterPosition());
                     }
                 }
@@ -58,7 +57,7 @@ public class KeyboardAdapter extends RecyclerView.Adapter<KeyboardAdapter.Keyboa
     @Override
     public void onBindViewHolder(KeyboardHolder holder, int position) {
         if (position == 9) {
-         holder.setVisibility(false);
+            holder.setVisibility(false);
         } else if (position == 11) {
             holder.rlDel.setVisibility(View.VISIBLE);
             holder.tvKey.setVisibility(View.GONE);
@@ -70,6 +69,17 @@ public class KeyboardAdapter extends RecyclerView.Adapter<KeyboardAdapter.Keyboa
     @Override
     public int getItemCount() {
         return datas == null ? 0 : datas.size();
+    }
+
+    public void setOnKeyboardClickListener(OnKeyboardClickListener listener) {
+        this.listener = listener;
+    }
+
+    public interface OnKeyboardClickListener {
+
+        void onKeyClick(View view, RecyclerView.ViewHolder holder, int position);
+
+        void onDeleteClick(View view, RecyclerView.ViewHolder holder, int position);
     }
 
     class KeyboardHolder extends RecyclerView.ViewHolder {
@@ -90,28 +100,17 @@ public class KeyboardAdapter extends RecyclerView.Adapter<KeyboardAdapter.Keyboa
         }
 
         public void setVisibility(boolean b) {
-                RecyclerView.LayoutParams param = (RecyclerView.LayoutParams)itemView.getLayoutParams();
-                if (b){
-                    param.height = LinearLayout.LayoutParams.WRAP_CONTENT;
-                    param.width = LinearLayout.LayoutParams.MATCH_PARENT;
-                    itemView.setVisibility(View.VISIBLE);
-                }else{
-                    itemView.setVisibility(View.GONE);
-                    param.height = 0;
-                    param.width = 0;
-                }
-                itemView.setLayoutParams(param);
+            RecyclerView.LayoutParams param = (RecyclerView.LayoutParams) itemView.getLayoutParams();
+            if (b) {
+                param.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                param.width = LinearLayout.LayoutParams.MATCH_PARENT;
+                itemView.setVisibility(View.VISIBLE);
+            } else {
+                itemView.setVisibility(View.GONE);
+                param.height = 0;
+                param.width = 0;
+            }
+            itemView.setLayoutParams(param);
         }
-    }
-
-    public interface OnKeyboardClickListener {
-
-        void onKeyClick(View view, RecyclerView.ViewHolder holder, int position);
-
-        void onDeleteClick(View view, RecyclerView.ViewHolder holder, int position);
-    }
-
-    public void setOnKeyboardClickListener(OnKeyboardClickListener listener) {
-        this.listener = listener;
     }
 }
